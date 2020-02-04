@@ -6,6 +6,7 @@ using Xamarin.Forms;
 using Xamarin.Forms.Xaml;
 using Plugin.AppShortcuts;
 using System.Linq;
+using System;
 
 [assembly: XamlCompilation(XamlCompilationOptions.Compile)]
 namespace AddShortcuts
@@ -39,33 +40,50 @@ namespace AddShortcuts
         }
         async void AddShortcuts()
         {
-            if (CrossAppShortcuts.IsSupported)
+            try
             {
-                var shortCurts = await CrossAppShortcuts.Current.GetShortcuts();
-                if (shortCurts.FirstOrDefault(prop => prop.Label == "Detail") == null)
+                if (CrossAppShortcuts.IsSupported)
                 {
-                    var shortcut = new Shortcut()
+                    var shortCurts = await CrossAppShortcuts.Current.GetShortcuts();
+                    if (shortCurts.FirstOrDefault(prop => prop.Label == "Detail") == null)
                     {
-                        Label = "Detail",
-                        Description = "Go to Detail",
-                        Icon = new ContactIcon(),
-                        Uri = $"{AppShortcutUriBase}{ShortcutOption1}"
-                    };
-                    await CrossAppShortcuts.Current.AddShortcut(shortcut);
-                }
+                        var shortcut = new Shortcut()
+                        {
+                            Label = "Detail",
+                            Description = "Go to Detail",
+                            Icon = new ContactIcon(),
+                            Uri = $"{AppShortcutUriBase}{ShortcutOption1}"
+                        };
+                        await CrossAppShortcuts.Current.AddShortcut(shortcut);
+                    }
 
-                if (shortCurts.FirstOrDefault(prop => prop.Label == "Detail 2") == null)
-                {
-                    var shortcut = new Shortcut()
+                    if (shortCurts.FirstOrDefault(prop => prop.Label == "Detail 2") == null)
                     {
-                        Label = "Detail 2",
-                        Description = "Go to Detail 2",
-                        Icon = new UpdateIcon(),
-                        Uri = $"{AppShortcutUriBase}{ShortcutOption2}"
-                    };
-                    await CrossAppShortcuts.Current.AddShortcut(shortcut);
+                        var shortcut = new Shortcut()
+                        {
+                            Label = "Detail 2",
+                            Description = "Go to Detail 2",
+                            Icon = new UpdateIcon(),
+                            Uri = $"{AppShortcutUriBase}{ShortcutOption2}"
+                        };
+                        await CrossAppShortcuts.Current.AddShortcut(shortcut);
+                    }
                 }
             }
+            catch (NotImplementedException)
+            {
+                //If you receive this error, then the Plugin has not been added as a nuget to the platform that you’re currently targeting.
+            }
+            catch (NotSupportedOnDeviceException)
+            {
+                //App shortcuts are not supported on Android API level 24 or lower, or on iOS 8 and below. 
+                //If you try and call this api on an unsupported device, this error is raised.
+            }
+            catch (Exception )
+            {
+                //Handle any other exception
+            }
+
         }
 
         protected override void OnAppLinkRequestReceived(Uri uri)
