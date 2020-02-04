@@ -7,6 +7,7 @@ using Xamarin.Forms.Xaml;
 using Plugin.AppShortcuts;
 using System.Linq;
 using System;
+using Plugin.AppShortcuts.Icons;
 
 [assembly: XamlCompilation(XamlCompilationOptions.Compile)]
 namespace AddShortcuts
@@ -37,6 +38,8 @@ namespace AddShortcuts
         {
             containerRegistry.RegisterForNavigation<NavigationPage>();
             containerRegistry.RegisterForNavigation<MainPage, MainPageViewModel>();
+            containerRegistry.RegisterForNavigation<Page1, Page1ViewModel>();
+            containerRegistry.RegisterForNavigation<Page2, Page2ViewModel>();
         }
         async void AddShortcuts()
         {
@@ -45,25 +48,26 @@ namespace AddShortcuts
                 if (CrossAppShortcuts.IsSupported)
                 {
                     var shortCurts = await CrossAppShortcuts.Current.GetShortcuts();
-                    if (shortCurts.FirstOrDefault(prop => prop.Label == "Detail") == null)
+                    //check if shortcut is already added or not 
+                    if (shortCurts.FirstOrDefault(prop => prop.Label == ShortcutOption1) == null)
                     {
                         var shortcut = new Shortcut()
                         {
-                            Label = "Detail",
-                            Description = "Go to Detail",
-                            Icon = new ContactIcon(),
+                            Label = ShortcutOption1,
+                            Description = "Go to Page 1",
+                            Icon = new DefaultIcon(),
                             Uri = $"{AppShortcutUriBase}{ShortcutOption1}"
                         };
                         await CrossAppShortcuts.Current.AddShortcut(shortcut);
                     }
 
-                    if (shortCurts.FirstOrDefault(prop => prop.Label == "Detail 2") == null)
+                    if (shortCurts.FirstOrDefault(prop => prop.Label == ShortcutOption2) == null)
                     {
                         var shortcut = new Shortcut()
                         {
-                            Label = "Detail 2",
-                            Description = "Go to Detail 2",
-                            Icon = new UpdateIcon(),
+                            Label = ShortcutOption2,
+                            Description = "Go to Page 2",
+                            Icon = new LoveIcon(),
                             Uri = $"{AppShortcutUriBase}{ShortcutOption2}"
                         };
                         await CrossAppShortcuts.Current.AddShortcut(shortcut);
@@ -86,7 +90,7 @@ namespace AddShortcuts
 
         }
 
-        protected override void OnAppLinkRequestReceived(Uri uri)
+        protected override async void OnAppLinkRequestReceived(Uri uri)
         {
             var option = uri.ToString().Replace(AppShortcutUriBase, "");
             if (!string.IsNullOrEmpty(option))
@@ -95,11 +99,11 @@ namespace AddShortcuts
                 switch (option)
                 {
                     case ShortcutOption1:
-                        MainPage.Navigation.PushAsync(new DetailPage());
+                        await NavigationService.NavigateAsync("NavigationPage/Page1");
                         break;
                     case ShortcutOption2:
 
-                        MainPage.Navigation.PushAsync(new Detail2Page());
+                        await NavigationService.NavigateAsync("NavigationPage/Page2");
                         break;
                 }
             }
